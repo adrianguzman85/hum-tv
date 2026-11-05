@@ -25,7 +25,8 @@
  * página, no detrás, y con .01 no se veía; con el reproductor visible (1) se ve en la ventana y a pantalla completa. */
 (function () {
   var q = {}, padre = window.parent, yt = null;
-  if (/Tizen 6\.5/.test(navigator.userAgent)) document.documentElement.className = 'en-pagina';
+  // Tizen 6.0 (AU8000 de Tuuk H03, H04 y H05) tenía el mismo síntoma que la 6.5: solo se oía. Va igual.
+  if (/Tizen 6\./.test(navigator.userAgent)) document.documentElement.className = 'en-pagina';
   var PERMITIDOS = { loadVideoById: 1, cueVideoById: 1, playVideo: 1, pauseVideo: 1, stopVideo: 1, setVolume: 1, mute: 1, unMute: 1, seekTo: 1 };
   location.hash.replace(/^#/, '').split('&').forEach(function (par) {
     var i = par.indexOf('=');
