@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hum Living · video</title>
-<style>html, body { margin: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; } #p { width: 100%; height: 100%; }</style>
+<style>html, body { margin: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; } #p { width: 100%; height: 100%; opacity: .01; }</style>
 </head>
 <body>
 <div id="p"></div>
@@ -19,7 +19,8 @@
  * Solo obedece a la ventana que la contiene y solo métodos de la lista. No lleva datos de ninguna casa.
  * El video inicial va en el hash: video.html#v=<id de YouTube>. Solo ES5: la Samsung de 2018 usa Chromium 56.
  * Fondo transparente: la Samsung dibuja la imagen del video en una capa detrás de la página y un fondo negro la tapa.
- * Sin subtítulos (en la TV salía «[Música]» encima). */
+ * Sin subtítulos (en la TV salía «[Música]» encima). El reproductor de YouTube va casi invisible (.01, como en Fire TV):
+ * su fondo negro y sus controles tapaban la imagen, que la TV dibuja detrás. */
 (function () {
   var q = {}, padre = window.parent, yt = null;
   var PERMITIDOS = { loadVideoById: 1, cueVideoById: 1, playVideo: 1, pauseVideo: 1, stopVideo: 1, setVolume: 1, mute: 1, unMute: 1, seekTo: 1 };
