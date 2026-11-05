@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hum Living · video</title>
+<style>html, body { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; } #p { width: 100%; height: 100%; }</style>
+</head>
+<body>
+<div id="p"></div>
+<script>
+/* Reproductor de YouTube del Launcher Motica Hum Living para la app de Samsung (Tizen).
+ * La app de Samsung corre en file:// y desde ahí YouTube no reproduce (error 153: falta el encabezado Referer). Esta
+ * página va en https (GitHub Pages: https://adrianguzman85.github.io/hum-tv/video.html), pone el reproductor y la app
+ * la maneja por postMessage:
+ *   la app manda   {hum: 1, tipo: 'llamar', metodo: 'loadVideoById' | 'playVideo' | ..., args: [...]}
+ *   la página avisa {hum: 1, tipo: 'onReady' | 'onStateChange' | 'onError', data} y cada segundo
+ *                   {hum: 1, tipo: 'estado', t, vol, mudo}
+ * Solo obedece a la ventana que la contiene y solo métodos de la lista. No lleva datos de ninguna casa.
+ * El video inicial va en el hash: video.html#v=<id de YouTube>. Solo ES5: la Samsung de 2018 usa Chromium 56. */
+(function () {
+  var q = {}, padre = window.parent, yt = null;
+  var PERMITIDOS = { loadVideoById: 1, cueVideoById: 1, playVideo: 1, pauseVideo: 1, stopVideo: 1, setVolume: 1, mute: 1, unMute: 1, seekTo: 1 };
+  location.hash.replace(/^#/, '').split('&').forEach(function (par) {
+    var i = par.indexOf('=');
+    if (i > 0) q[par.slice(0, i)] = decodeURIComponent(par.slice(i + 1));
+  });
+  function avisar(m) { m.hum = 1; try { padre.postMessage(JSON.stringify(m), '*'); } catch (e) {} }
+
+  window.addEventListener('message', function (e) {
+    var m;
+    if (e.source !== padre || !yt) return;
+    try { m = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (x) { return; }
+    if (!m || m.hum !== 1 || m.tipo !== 'llamar' || !PERMITIDOS[m.metodo]) return;
+    try { yt[m.metodo].apply(yt, m.args || []); } catch (x) {}
+  });
+
+  window.onYouTubeIframeAPIReady = function () {
+    yt = new YT.Player('p', {
+      width: '100%', height: '100%', videoId: q.v || '',
+      playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0, playsinline: 1 },
+      events: {
+        onReady: function () { avisar({ tipo: 'onReady' }); },
+        onStateChange: function (e) { avisar({ tipo: 'onStateChange', data: e.data }); },
+        onError: function (e) { avisar({ tipo: 'onError', data: e.data }); }
+      }
+    });
+    setInterval(function () {
+      try { avisar({ tipo: 'estado', t: yt.getCurrentTime(), vol: yt.getVolume(), mudo: yt.isMuted() }); } catch (e) {}
+    }, 1000);
+  };
+  var s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  s.onerror = function () { avisar({ tipo: 'onError', data: -1 }); };
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
